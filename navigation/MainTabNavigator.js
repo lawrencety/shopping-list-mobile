@@ -7,10 +7,15 @@ import {
 
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
+import ListScreen from '../screens/ListScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import Colors from '../constants/Colors';
 
 const HomeStack = createStackNavigator({
-  Home: HomeScreen,
+  Home: {screen: HomeScreen},
+  List: {screen: ListScreen}
+}, {
+  initialRouteName: 'Home'
 });
 
 HomeStack.navigationOptions = {
@@ -20,8 +25,8 @@ HomeStack.navigationOptions = {
       focused={focused}
       name={
         Platform.OS === 'ios'
-          ? `ios-information-circle${focused ? '' : '-outline'}`
-          : 'md-information-circle'
+          ? `ios-list${focused ? '' : '-outline'}`
+          : 'md-list'
       }
     />
   ),
@@ -44,4 +49,8 @@ SettingsStack.navigationOptions = {
 export default createBottomTabNavigator({
   HomeStack,
   SettingsStack,
+},{
+  tabBarOptions: {
+    activeTintColor: Colors.tintColor,
+    }
 });

@@ -18,7 +18,7 @@ class ListScreen extends React.Component {
 export default ListScreen;
 
 ListScreen.navigationOptions = {
-  header: 'List',
+  header: null,
 };
 
 const styles = StyleSheet.create({
