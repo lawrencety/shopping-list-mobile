@@ -94,7 +94,7 @@ class HomeScreen extends React.Component {
 }
 
 HomeScreen.navigationOptions = {
-  header: null,
+  title: 'My Lists',
 };
 
 export default HomeScreen;
