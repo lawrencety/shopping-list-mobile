@@ -14,5 +14,5 @@ class SettingsScreen extends React.Component {
 export default SettingsScreen;
 
 SettingsScreen.navigationOptions = {
-  title: 'app.json',
+  title: 'Settings',
 };

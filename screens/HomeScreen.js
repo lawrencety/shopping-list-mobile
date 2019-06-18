@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import Colors from '../constants/Colors';
-import { MonoText } from '../components/StyledText';
+
 
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -23,40 +23,53 @@ class HomeScreen extends React.Component {
   }
 
   componentDidMount() {
-    const url = '//localhost:3000/lists';
-    fetch(url)
+    const url = 'http://192.168.1.67:3000/lists';
+    return fetch(url)
     .then((res) => {
-      res.json()
+      return res.json()
     })
     .then((response) => {
-      console.log('Success', JSON.stringify(response))
-
+      this.setState({
+        lists: response.data
+      })
     })
-    this.setState({
-      lists: [
-        {_id: 123 ,name: 'July 4th', items: [
-          {name: 'Hot dogs', quantity: 10},
-          {name: 'Burgers', quantity: 10},
-        ]},
-        {_id: 456, name: 'Christmas', items: [
-          {name: 'Sugar cookies', quantity: 30},
-          {name: 'Pot Roast', quantity: 1},
-        ]}]
+    .catch((err) => {
+      console.log(err)
+      this.setState({
+        lists: [
+          {_id: 123 ,name: 'July 4th', items: [
+            {_id: 123 ,name: 'Hot dogs', quantity: 10, purchaseStatus: true},
+            {_id: 234 ,name: 'Burgers', quantity: 10, purchaseStatus: false},
+          ]},
+          {_id: 456, name: 'Christmas', items: [
+            {_id: 555 ,name: 'Sugar cookies', quantity: 30, purchaseStatus: true},
+            {_id: 567 ,name: 'Pot Roast', quantity: 1, purchaseStatus: false},
+          ]}]
+      })
     })
   }
 
-  selectList(e) {
-
+  setPurchaseStatus(e, listId, itemId) {
+    const newLists = this.state.lists;
+    newLists.forEach((list) => {
+      if (list._id === listId) {
+        list.items.forEach((item) => {
+          if(item._id === itemId) {
+            item.purchaseStatus = e;
+            return (
+              this.setState({
+                lists: newLists
+              })
+            )
+          }
+        })
+      }
+    })
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>
-            My Lists
-          </Text>
-        </View>
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.contentContainer}>
@@ -65,7 +78,13 @@ class HomeScreen extends React.Component {
               return (
                 <TouchableNativeFeedback
                   key={list._id}
-                  onPress={() => this.props.navigation.navigate('List')}
+                  onPress={() => {this.props.navigation.navigate('List', {
+                      name: list.name,
+                      id: list._id,
+                      items: list.items,
+                      setPurchaseStatus: this.setPurchaseStatus.bind(this)
+                    }
+                  )}}
                   background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
                 >
                   <View style={styles.listContainer}>
@@ -95,6 +114,13 @@ class HomeScreen extends React.Component {
 
 HomeScreen.navigationOptions = {
   title: 'My Lists',
+  headerStyle: {
+      backgroundColor: Colors.tintColor
+  },
+  headerTintColor: '#fff',
+  headerTitleStyle: {
+    fontWeight: 'bold'
+  }
 };
 
 export default HomeScreen;
@@ -104,32 +130,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  developmentModeText: {
-    marginBottom: 20,
-    color: 'rgba(0,0,0,0.4)',
-    fontSize: 14,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
   contentContainer: {
     flex: 1,
     paddingTop: 0,
     backgroundColor: 'rgba(96,100,109, 0.1)'
-  },
-  headerContainer: {
-    height: 66,
-    alignItems: 'center',
-    paddingTop: 32,
-    paddingBottom: 10,
-    backgroundColor: Colors.tintColor,
-    borderBottomColor: 'rgba(96,100,109, 1)',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  headerText: {
-    fontSize: 22,
-    color: 'white',
-    lineHeight: 24,
-    textAlign: 'center',
   },
   listContainer: {
     alignItems: 'stretch',
