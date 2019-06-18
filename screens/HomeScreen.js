@@ -23,13 +23,15 @@ class HomeScreen extends React.Component {
   }
 
   componentDidMount() {
-    const url = 'http://10.0.2.2:3000/lists';
+    const url = 'http://192.168.1.67:3000/lists';
     return fetch(url)
     .then((res) => {
-      res.json()
+      return res.json()
     })
     .then((response) => {
-      console.log('Success', JSON.stringify(response))
+      this.setState({
+        lists: response.data
+      })
     })
     .catch((err) => {
       console.log(err)

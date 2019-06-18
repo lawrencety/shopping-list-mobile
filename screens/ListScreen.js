@@ -1,8 +1,10 @@
 import React from 'react';
 import {
+  Platform,
   View,
   ScrollView,
   CheckBox,
+  TouchableNativeFeedback,
   Text,
   StyleSheet
 } from 'react-native';
@@ -22,9 +24,7 @@ class ListScreen extends React.Component {
     const {navigation} = this.props;
     const nameParam = navigation.getParam('name', 'List Name');
     const itemsParam = navigation.getParam('items', []);
-    console.log(nameParam);
-    console.log(itemsParam)
-    this.setState({
+    return this.setState({
       name: nameParam,
       items: itemsParam
     });
@@ -32,7 +32,7 @@ class ListScreen extends React.Component {
 
   toggleCheckBox(e, listId, itemId) {
     const {navigation} = this.props;
-    console.log(navigation);
+    console.log(this.state.items);
     return navigation.state.params.setPurchaseStatus(e, listId, itemId);
   }
 
@@ -42,34 +42,48 @@ class ListScreen extends React.Component {
     const name = navigation.getParam('name', 'List Name');
     const items = navigation.getParam('items', []);
     return (
-      <ScrollView style={styles.contentContainer}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>
-            {this.state.name}
-          </Text>
+      <View style={styles.container}>
+        <ScrollView style={styles.contentContainer}>
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>
+              {this.state.name}
+            </Text>
+          </View>
+          {
+            items.map((item) => {
+              return (
+                <View style={styles.itemContainer} key={item._id}>
+                  <View style={styles.checkBoxContainer}>
+                    <CheckBox value={item.purchaseStatus} onValueChange={(e) => {this.toggleCheckBox(e, id, item._id)}}></CheckBox>
+                  </View>
+                  <View style={styles.itemNameContainer}>
+                    <Text style={styles.itemText}>
+                      {item.name}
+                    </Text>
+                  </View>
+                  <View style={styles.itemQtyContainer}>
+                    <Text style={styles.itemText}>
+                      qty: {item.quantity}
+                    </Text>
+                  </View>
+                </View>
+              )
+            })
+          }
+        </ScrollView>
+        <View style={styles.footerContainer}>
+          <TouchableNativeFeedback
+            onPress={(e) => this.newItem(e)}
+            background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
+          >
+            <View>
+              <Text style={styles.footerText}>
+                Add Item
+              </Text>
+            </View>
+          </TouchableNativeFeedback>
         </View>
-        {
-          items.map((item) => {
-            return (
-              <View style={styles.itemContainer} key={item._id}>
-                <View style={styles.checkBoxContainer}>
-                  <CheckBox value={item.purchaseStatus} onValueChange={(e) => {this.toggleCheckBox(e, id, item._id)}}></CheckBox>
-                </View>
-                <View style={styles.itemNameContainer}>
-                  <Text style={styles.itemText}>
-                    {item.name}
-                  </Text>
-                </View>
-                <View style={styles.itemQtyContainer}>
-                  <Text style={styles.itemText}>
-                    qty: {item.quantity}
-                  </Text>
-                </View>
-              </View>
-            )
-          })
-        }
-      </ScrollView>
+      </View>
     );
   }
 }
@@ -87,6 +101,10 @@ ListScreen.navigationOptions = {
 export default ListScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   contentContainer: {
     flex: 1,
     paddingTop: 0,
@@ -131,6 +149,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'rgba(96,100,109, 1)',
     lineHeight: 28,
+    textAlign: 'left',
+  },
+  footerContainer: {
+    height: 44,
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  footerText: {
+    fontSize: 20,
+    color: Colors.tintColor,
+    lineHeight: 24,
     textAlign: 'left',
   },
 });
