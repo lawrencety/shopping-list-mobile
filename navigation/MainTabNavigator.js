@@ -16,6 +16,10 @@ const HomeStack = createStackNavigator({
   List: {screen: ListScreen}
 }, {
   initialRouteName: 'Home'
+}, {
+  defaultNavigationOptions: {
+    
+  }
 });
 
 HomeStack.navigationOptions = {

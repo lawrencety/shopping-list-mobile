@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import Colors from '../constants/Colors';
-import { MonoText } from '../components/StyledText';
+
 
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -45,18 +45,10 @@ class HomeScreen extends React.Component {
     })
   }
 
-  selectList(e) {
-
-  }
 
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>
-            My Lists
-          </Text>
-        </View>
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.contentContainer}>
@@ -65,7 +57,7 @@ class HomeScreen extends React.Component {
               return (
                 <TouchableNativeFeedback
                   key={list._id}
-                  onPress={() => this.props.navigation.navigate('List')}
+                  onPress={() => {this.props.navigation.navigate('List', {name: list.name})}}
                   background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
                 >
                   <View style={styles.listContainer}>
@@ -95,6 +87,13 @@ class HomeScreen extends React.Component {
 
 HomeScreen.navigationOptions = {
   title: 'My Lists',
+  headerStyle: {
+      backgroundColor: Colors.tintColor
+  },
+  headerTintColor: '#fff',
+  headerTitleStyle: {
+    fontWeight: 'bold'
+  }
 };
 
 export default HomeScreen;
@@ -115,21 +114,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 0,
     backgroundColor: 'rgba(96,100,109, 0.1)'
-  },
-  headerContainer: {
-    height: 66,
-    alignItems: 'center',
-    paddingTop: 32,
-    paddingBottom: 10,
-    backgroundColor: Colors.tintColor,
-    borderBottomColor: 'rgba(96,100,109, 1)',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  headerText: {
-    fontSize: 22,
-    color: 'white',
-    lineHeight: 24,
-    textAlign: 'center',
   },
   listContainer: {
     alignItems: 'stretch',
