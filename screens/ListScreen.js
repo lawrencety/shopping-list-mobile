@@ -6,10 +6,14 @@ import {
   ScrollView,
   CheckBox,
   TouchableNativeFeedback,
+  TouchableHighlight,
+  TouchableOpacity,
   Text,
   StyleSheet
 } from 'react-native';
 import Colors from '../constants/Colors';
+import EditList from './modals/EditList';
+const url = 'http://192.168.1.67:3000/';
 
 class ListScreen extends React.Component {
   constructor(props) {
@@ -17,18 +21,60 @@ class ListScreen extends React.Component {
 
     this.state = {
       name: '',
-      items: []
+      id: '',
+      items: [],
+      listModalVisibility: false,
     }
   }
 
   componentDidMount() {
     const {navigation} = this.props;
+    const id = navigation.getParam('id', 'List ID');
     const nameParam = navigation.getParam('name', 'List Name');
     const itemsParam = navigation.getParam('items', []);
+    console.log('Name First', nameParam)
     return this.setState({
+      id : id,
       name: nameParam,
       items: itemsParam
     });
+  }
+
+  openListModal(e) {
+    this.setState({
+      listModalVisibility: true
+    })
+  }
+
+  closeListModal(e) {
+    this.setState({
+      listModalVisibility: false
+    })
+  }
+
+  updateList(e) {
+    const options = {
+      name: e.name,
+      date: e.date,
+    }
+    fetch(`${url}lists/${this.state.id}/update`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(options)
+      }
+    )
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      this.setState({
+        name: response.data.name,
+      })
+      this.closeListModal(e)
+    })
   }
 
   toggleCheckBox(e, listId, itemId) {
@@ -38,20 +84,34 @@ class ListScreen extends React.Component {
   }
 
   render() {
-    const {navigation} = this.props;
-    const id = navigation.getParam('id', 'List ID');
-    const name = navigation.getParam('name', 'List Name');
-    const items = navigation.getParam('items', []);
     return (
       <View style={styles.container}>
+        <EditList
+          listModalVisibility = {this.state.listModalVisibility}
+          closeListModal = {(e) => {this.closeListModal(e)}}
+          name = {this.state.name}
+          updateList = {(e) => {this.updateList(e)}}
+          />
         <ScrollView style={styles.contentContainer}>
           <View style={styles.headerContainer}>
             <Text style={styles.headerText}>
               {this.state.name}
             </Text>
+            <TouchableOpacity onPress={(e) => {this.openListModal(e)}}>
+              <Ionicons
+                name={
+                  Platform.OS === 'ios'
+                  ? `ios-create${focused ? '' : '-outline'}`
+                  : 'md-create'
+                }
+                size={26}
+                color='rgba(96,100,109, 1)'
+                style={{ marginBottom: -3, marginRight: 12 }}
+              />
+            </TouchableOpacity>
           </View>
           {
-            items.map((item) => {
+            this.state.items.map((item) => {
               return (
                 <View style={styles.itemContainer} key={item._id}>
                   <View style={styles.checkBoxContainer}>
@@ -122,7 +182,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(96,100,109, 0.1)'
   },
   headerContainer: {
-    alignItems: 'stretch',
+    justifyContent: 'space-between',
     flexDirection: 'row',
     paddingLeft: 20,
     paddingTop: 10,
