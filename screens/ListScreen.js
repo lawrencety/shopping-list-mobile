@@ -1,14 +1,20 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   Platform,
   View,
   ScrollView,
   CheckBox,
   TouchableNativeFeedback,
+  TouchableHighlight,
+  TouchableOpacity,
   Text,
   StyleSheet
 } from 'react-native';
 import Colors from '../constants/Colors';
+import EditList from './modals/EditList';
+import ConfirmDeleteList from './modals/ConfirmDeleteList';
+const url = 'http://192.168.1.67:3000/';
 
 class ListScreen extends React.Component {
   constructor(props) {
@@ -16,41 +22,136 @@ class ListScreen extends React.Component {
 
     this.state = {
       name: '',
-      items: []
+      id: '',
+      items: [],
+      listModalVisibility: false,
+      deleteConfirmModalVisibility: false,
     }
   }
 
   componentDidMount() {
     const {navigation} = this.props;
+    const id = navigation.getParam('id', 'List ID');
     const nameParam = navigation.getParam('name', 'List Name');
     const itemsParam = navigation.getParam('items', []);
+    console.log('Name First', nameParam)
     return this.setState({
+      id : id,
       name: nameParam,
       items: itemsParam
     });
   }
 
+  openListModal(e) {
+    this.setState({
+      listModalVisibility: true
+    })
+  }
+
+  closeListModal(e) {
+    this.setState({
+      listModalVisibility: false
+    })
+  }
+
+  updateList(e) {
+    const options = {
+      name: e.name,
+      date: e.date,
+    }
+    fetch(`${url}lists/${this.state.id}/update`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(options)
+      }
+    )
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      this.setState({
+        name: response.data.name,
+      })
+      this.closeListModal(e)
+    })
+  }
+
+  confirmDelete(e) {
+    this.setState({
+      listModalVisibility: false,
+      deleteConfirmModalVisibility: true,
+    })
+  }
+
+  closeConfirmDeleteModal(e) {
+    this.setState({
+      deleteConfirmModalVisibility: false
+    })
+  }
+
+  deleteListConfirmed(e) {
+    fetch(`${url}lists/${this.state.id}/destroy`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+        }
+      }
+    )
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      const {navigation} = this.props;
+      navigation.state.params.handleDeleteList(this.state.id)
+      navigation.popToTop()
+      this.closeConfirmDeleteModal(e)
+    })
+  }
+
   toggleCheckBox(e, listId, itemId) {
     const {navigation} = this.props;
-    console.log(this.state.items);
     return navigation.state.params.setPurchaseStatus(e, listId, itemId);
   }
 
   render() {
-    const {navigation} = this.props;
-    const id = navigation.getParam('id', 'List ID');
-    const name = navigation.getParam('name', 'List Name');
-    const items = navigation.getParam('items', []);
     return (
       <View style={styles.container}>
+        <EditList
+          listModalVisibility = {this.state.listModalVisibility}
+          closeListModal = {(e) => {this.closeListModal(e)}}
+          name = {this.state.name}
+          updateList = {(e) => {this.updateList(e)}}
+          confirmDelete = {(e) => {this.confirmDelete(e)}}
+          />
+        <ConfirmDeleteList
+          deleteConfirmModalVisibility = {this.state.deleteConfirmModalVisibility}
+          closeConfirmDeleteModal = {(e) => {this.closeConfirmDeleteModal(e)}}
+          deleteListConfirmed = {(e) => {this.deleteListConfirmed(e)}}
+          />
         <ScrollView style={styles.contentContainer}>
           <View style={styles.headerContainer}>
             <Text style={styles.headerText}>
               {this.state.name}
             </Text>
+            <TouchableOpacity onPress={(e) => {this.openListModal(e)}}>
+              <Ionicons
+                name={
+                  Platform.OS === 'ios'
+                  ? `ios-create${focused ? '' : '-outline'}`
+                  : 'md-create'
+                }
+                size={26}
+                color='rgba(96,100,109, 1)'
+                style={{ marginBottom: -3, marginRight: 12 }}
+              />
+            </TouchableOpacity>
           </View>
           {
-            items.map((item) => {
+            this.state.items.map((item) => {
               return (
                 <View style={styles.itemContainer} key={item._id}>
                   <View style={styles.checkBoxContainer}>
@@ -76,11 +177,21 @@ class ListScreen extends React.Component {
             onPress={(e) => this.newItem(e)}
             background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
           >
-            <View>
-              <Text style={styles.footerText}>
-                Add Item
-              </Text>
-            </View>
+          <View style={styles.addNewContainer}>
+            <Ionicons
+              name={
+                Platform.OS === 'ios'
+                ? `ios-add${focused ? '' : '-outline'}`
+                : 'md-add'
+              }
+              size={24}
+              color={Colors.tintColor}
+              style={{ paddingRight: 10 }}
+            />
+            <Text style={styles.footerText}>
+              Add Item
+            </Text>
+          </View>
           </TouchableNativeFeedback>
         </View>
       </View>
@@ -111,7 +222,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(96,100,109, 0.1)'
   },
   headerContainer: {
-    alignItems: 'stretch',
+    justifyContent: 'space-between',
     flexDirection: 'row',
     paddingLeft: 20,
     paddingTop: 10,
@@ -156,6 +267,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 10,
     paddingBottom: 10,
+  },
+  addNewContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly'
   },
   footerText: {
     fontSize: 20,
