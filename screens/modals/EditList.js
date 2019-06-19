@@ -11,8 +11,9 @@ import {
   Button,
   StyleSheet
 } from 'react-native';
+import Colors from '../../constants/Colors';
 
-class NewList extends React.Component {
+class EditList extends React.Component {
   constructor(props) {
     super(props)
 
@@ -46,6 +47,10 @@ class NewList extends React.Component {
     this.props.closeListModal(e)
   }
 
+  deleteList(e) {
+    this.props.confirmDelete(e)
+  }
+
   render() {
     return (
         <KeyboardAvoidingView>
@@ -59,6 +64,18 @@ class NewList extends React.Component {
             <View style={styles.container}>
               <View style={styles.contentContainer}>
                 <View style={styles.closeContainer}>
+                  <TouchableHighlight onPress={(e) => {this.deleteList(e)}}>
+                    <Ionicons
+                      name={
+                        Platform.OS === 'ios'
+                        ? `ios-trash${focused ? '' : '-outline'}`
+                        : 'md-trash'
+                      }
+                      size={36}
+                      color='rgba(96,100,109, 1)'
+                      style={{ marginBottom: -3 }}
+                    />
+                  </TouchableHighlight>
                   <TouchableHighlight onPress={(e) => {this.closeModal(e)}}>
                     <Ionicons
                       name={
@@ -66,7 +83,7 @@ class NewList extends React.Component {
                         ? `ios-close${focused ? '' : '-outline'}`
                         : 'md-close'
                       }
-                      size={40}
+                      size={36}
                       color='rgba(96,100,109, 1)'
                       style={{ marginBottom: -3 }}
                     />
@@ -90,6 +107,7 @@ class NewList extends React.Component {
                   </View>
                   <Button
                     title='Update List'
+                    color={Colors.tintColor}
                     onPress={(e) => {this.handleClick(e)}}
                     />
                 </View>
@@ -101,7 +119,7 @@ class NewList extends React.Component {
   }
 }
 
-export default NewList;
+export default EditList;
 
 const styles = StyleSheet.create({
   container: {
@@ -118,9 +136,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
   closeContainer: {
+    flexDirection: 'row',
+    marginLeft: 10,
     marginRight: 10,
     marginBottom: -40,
-    alignItems: 'flex-end'
+    justifyContent: 'space-between'
   },
   formContainer: {
     flex: 1,

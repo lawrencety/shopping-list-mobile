@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import Colors from '../constants/Colors';
 import EditList from './modals/EditList';
+import ConfirmDeleteList from './modals/ConfirmDeleteList';
 const url = 'http://192.168.1.67:3000/';
 
 class ListScreen extends React.Component {
@@ -24,6 +25,7 @@ class ListScreen extends React.Component {
       id: '',
       items: [],
       listModalVisibility: false,
+      deleteConfirmModalVisibility: false,
     }
   }
 
@@ -77,9 +79,41 @@ class ListScreen extends React.Component {
     })
   }
 
+  confirmDelete(e) {
+    this.setState({
+      listModalVisibility: false,
+      deleteConfirmModalVisibility: true,
+    })
+  }
+
+  closeConfirmDeleteModal(e) {
+    this.setState({
+      deleteConfirmModalVisibility: false
+    })
+  }
+
+  deleteListConfirmed(e) {
+    fetch(`${url}lists/${this.state.id}/destroy`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+        }
+      }
+    )
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      const {navigation} = this.props;
+      navigation.state.params.handleDeleteList(this.state.id)
+      navigation.popToTop()
+      this.closeConfirmDeleteModal(e)
+    })
+  }
+
   toggleCheckBox(e, listId, itemId) {
     const {navigation} = this.props;
-    console.log(this.state.items);
     return navigation.state.params.setPurchaseStatus(e, listId, itemId);
   }
 
@@ -91,6 +125,12 @@ class ListScreen extends React.Component {
           closeListModal = {(e) => {this.closeListModal(e)}}
           name = {this.state.name}
           updateList = {(e) => {this.updateList(e)}}
+          confirmDelete = {(e) => {this.confirmDelete(e)}}
+          />
+        <ConfirmDeleteList
+          deleteConfirmModalVisibility = {this.state.deleteConfirmModalVisibility}
+          closeConfirmDeleteModal = {(e) => {this.closeConfirmDeleteModal(e)}}
+          deleteListConfirmed = {(e) => {this.deleteListConfirmed(e)}}
           />
         <ScrollView style={styles.contentContainer}>
           <View style={styles.headerContainer}>

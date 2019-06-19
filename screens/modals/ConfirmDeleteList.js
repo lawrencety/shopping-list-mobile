@@ -7,36 +7,23 @@ import {
   TouchableHighlight,
   Platform,
   Text,
-  TextInput,
   Button,
   StyleSheet
 } from 'react-native';
 import Colors from '../../constants/Colors';
 
-class NewList extends React.Component {
+class ConfirmDeleteList extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = {
-      name: '',
-      date: ''
-    }
-  }
-
-  handleChange(e, prop) {
-    this.setState({ [prop]: e });
   }
 
   handleClick(e) {
-    const options = {
-      name: this.state.name,
-      date: this.state.date
-    }
-    this.props.createList(options)
+    this.props.deleteListConfirmed(e)
   }
 
   closeModal(e) {
-    this.props.hideModal(e)
+    this.props.closeConfirmDeleteModal(e)
   }
 
   render() {
@@ -46,44 +33,25 @@ class NewList extends React.Component {
             animationType="slide"
             transparent={true}
             behavior='padding'
-            visible={this.props.modalVisibility}
+            visible={this.props.deleteConfirmModalVisibility}
             onRequestClose={(e) => {this.closeModal(e)}}
           >
             <View style={styles.container}>
               <View style={styles.contentContainer}>
-                <View style={styles.closeContainer}>
-                  <TouchableHighlight onPress={(e) => {this.closeModal(e)}}>
-                    <Ionicons
-                      name={
-                        Platform.OS === 'ios'
-                        ? `ios-close${focused ? '' : '-outline'}`
-                        : 'md-close'
-                      }
-                      size={40}
-                      color='rgba(96,100,109, 1)'
-                      style={{ marginBottom: -3 }}
-                    />
-                  </TouchableHighlight>
+                <View style={styles.headerContainer}>
+                  <Text style={styles.headerText}>
+                    Confirm Delete
+                  </Text>
                 </View>
                 <View style={styles.formContainer}>
-                  <View style={styles.headerContainer}>
-                    <Text style={styles.headerText}>
-                      New List
-                    </Text>
-                  </View>
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      placeholder='List Name'
-                      placeholderTextColor='rgba(96,100,109, 0.6)'
-                      value={this.state.name}
-                      style={styles.inputText}
-                      onChangeText={(e) => {this.handleChange(e, 'name')}}
-                    >
-                    </TextInput>
-                  </View>
                   <Button
-                    title='Create List'
+                    title='Cancel'
                     color={Colors.tintColor}
+                    onPress={(e) => {this.closeModal(e)}}
+                    />
+                  <Button
+                    title='Confirm Delete'
+                    color={Colors.errorBackground}
                     onPress={(e) => {this.handleClick(e)}}
                     />
                 </View>
@@ -95,7 +63,7 @@ class NewList extends React.Component {
   }
 }
 
-export default NewList;
+export default ConfirmDeleteList;
 
 const styles = StyleSheet.create({
   container: {
@@ -108,6 +76,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     height: 180,
     width: 350,
+    padding: 20,
     borderRadius: 4,
     backgroundColor: '#fff'
   },

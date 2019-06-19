@@ -121,6 +121,15 @@ class HomeScreen extends React.Component {
     })
   }
 
+  handleDeleteList(e) {
+    const newLists = this.state.lists.filter((list) => {
+      return list._id !== e
+    })
+    this.setState({
+      lists: newLists
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -141,7 +150,8 @@ class HomeScreen extends React.Component {
                       name: list.name,
                       id: list._id,
                       items: list.items,
-                      setPurchaseStatus: this.setPurchaseStatus.bind(this)
+                      setPurchaseStatus: (e) => this.setPurchaseStatus(e),
+                      handleDeleteList: (e) => this.handleDeleteList(e)
                     }
                   )}}
                   background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
