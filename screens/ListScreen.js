@@ -14,6 +14,7 @@ import {
 import Colors from '../constants/Colors';
 import EditList from './modals/EditList';
 import ConfirmDeleteList from './modals/ConfirmDeleteList';
+import NewItem from './modals/NewItem';
 const url = 'http://192.168.1.67:3000/';
 
 class ListScreen extends React.Component {
@@ -26,6 +27,7 @@ class ListScreen extends React.Component {
       items: [],
       listModalVisibility: false,
       deleteConfirmModalVisibility: false,
+      newItemModalVisibility: false,
     }
   }
 
@@ -34,7 +36,6 @@ class ListScreen extends React.Component {
     const id = navigation.getParam('id', 'List ID');
     const nameParam = navigation.getParam('name', 'List Name');
     const itemsParam = navigation.getParam('items', []);
-    console.log('Name First', nameParam)
     return this.setState({
       id : id,
       name: nameParam,
@@ -112,6 +113,43 @@ class ListScreen extends React.Component {
     })
   }
 
+  newItem(e) {
+    this.setState({
+      newItemModalVisibility: true
+    })
+  }
+
+  closeNewItemModal(e) {
+    this.setState({
+      newItemModalVisibility: false
+    })
+  }
+
+  createItem(e) {
+    const options = {
+      name: e.name,
+      quantity: e.quantity,
+    }
+    fetch(`${url}lists/${this.state.id}/items/create`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(options)
+      }
+    )
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      this.setState({
+        items: this.state.items.concat(response.data)
+      })
+      this.closeNewItemModal(e)
+    })
+  }
+
   toggleCheckBox(e, listId, itemId) {
     const {navigation} = this.props;
     return navigation.state.params.setPurchaseStatus(e, listId, itemId);
@@ -131,6 +169,11 @@ class ListScreen extends React.Component {
           deleteConfirmModalVisibility = {this.state.deleteConfirmModalVisibility}
           closeConfirmDeleteModal = {(e) => {this.closeConfirmDeleteModal(e)}}
           deleteListConfirmed = {(e) => {this.deleteListConfirmed(e)}}
+          />
+        <NewItem
+          newItemModalVisibility = {this.state.newItemModalVisibility}
+          closeNewItemModal = {(e) => {this.closeNewItemModal(e)}}
+          createItem = {(e) => {this.createItem(e)}}
           />
         <ScrollView style={styles.contentContainer}>
           <View style={styles.headerContainer}>
@@ -172,28 +215,28 @@ class ListScreen extends React.Component {
             })
           }
         </ScrollView>
-        <View style={styles.footerContainer}>
-          <TouchableNativeFeedback
-            onPress={(e) => this.newItem(e)}
-            background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
-          >
-          <View style={styles.addNewContainer}>
-            <Ionicons
-              name={
-                Platform.OS === 'ios'
-                ? `ios-add${focused ? '' : '-outline'}`
-                : 'md-add'
-              }
-              size={24}
-              color={Colors.tintColor}
-              style={{ paddingRight: 10 }}
-            />
-            <Text style={styles.footerText}>
-              Add Item
-            </Text>
+        <TouchableNativeFeedback
+          onPress={(e) => this.newItem(e)}
+          background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
+        >
+          <View style={styles.footerContainer}>
+            <View style={styles.addNewContainer}>
+              <Ionicons
+                name={
+                  Platform.OS === 'ios'
+                  ? `ios-add${focused ? '' : '-outline'}`
+                  : 'md-add'
+                }
+                size={24}
+                color={Colors.tintColor}
+                style={{ paddingRight: 10 }}
+              />
+              <Text style={styles.footerText}>
+                Add Item
+              </Text>
+            </View>
           </View>
-          </TouchableNativeFeedback>
-        </View>
+        </TouchableNativeFeedback>
       </View>
     );
   }

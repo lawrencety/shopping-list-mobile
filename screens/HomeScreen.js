@@ -164,11 +164,11 @@ class HomeScreen extends React.Component {
             })
           }
         </ScrollView>
-        <View style={styles.footerContainer}>
-          <TouchableNativeFeedback
-            onPress={(e) => {this.newList(e)}}
-            background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
-          >
+        <TouchableNativeFeedback
+          onPress={(e) => {this.newList(e)}}
+          background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
+        >
+          <View style={styles.footerContainer}>
             <View style={styles.addNewContainer}>
               <Ionicons
                 name={
@@ -184,8 +184,8 @@ class HomeScreen extends React.Component {
                 New List
               </Text>
             </View>
-          </TouchableNativeFeedback>
-        </View>
+          </View>
+        </TouchableNativeFeedback>
       </View>
     );
   }
