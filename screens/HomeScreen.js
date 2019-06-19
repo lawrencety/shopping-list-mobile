@@ -1,5 +1,6 @@
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   Image,
   Platform,
@@ -11,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import Colors from '../constants/Colors';
+import NewList from './modals/NewList';
+const url = 'http://192.168.1.67:3000/';
 
 
 class HomeScreen extends React.Component {
@@ -19,12 +22,12 @@ class HomeScreen extends React.Component {
 
     this.state = {
       lists: [],
+      modalVisibility: false
     }
   }
 
   componentDidMount() {
-    const url = 'http://192.168.1.67:3000/lists';
-    return fetch(url)
+    return fetch(`${url}lists`)
     .then((res) => {
       return res.json()
     })
@@ -44,7 +47,8 @@ class HomeScreen extends React.Component {
           {_id: 456, name: 'Christmas', items: [
             {_id: 555 ,name: 'Sugar cookies', quantity: 30, purchaseStatus: true},
             {_id: 567 ,name: 'Pot Roast', quantity: 1, purchaseStatus: false},
-          ]}]
+          ]}
+        ]
       })
     })
   }
@@ -56,9 +60,22 @@ class HomeScreen extends React.Component {
         list.items.forEach((item) => {
           if(item._id === itemId) {
             item.purchaseStatus = e;
+            const endpoint = '';
+            if (e) {
+              endpoint = 'purchaseStatusTrue';
+            } else {
+              endpoint = 'purchaseStatusFalse';
+            }
             return (
-              this.setState({
-                lists: newLists
+              fetch(`${url}lists/${listId}/items/${itemId}/${endpoint}`)
+              .then((res) => {
+                return res.json()
+              })
+              .then((response) => {
+                console.log('Success', response)
+                this.setState({
+                  lists: newLists
+                })
               })
             )
           }
@@ -67,9 +84,51 @@ class HomeScreen extends React.Component {
     })
   }
 
+  newList(e) {
+    this.setState({
+      modalVisibility: true
+    })
+  }
+
+  hideModal(e) {
+    this.setState({
+      modalVisibility: false
+    })
+  }
+
+  createList(e) {
+    const options = {
+      name: e.name,
+      date: e.date,
+    }
+    fetch(`${url}lists/create`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(options)
+      }
+    )
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      this.setState({
+        lists: this.state.lists.concat(response.data)
+      })
+      this.hideModal(e)
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
+        <NewList
+          modalVisibility= {this.state.modalVisibility}
+          hideModal= {(e) => {this.hideModal(e)}}
+          createList= {(e) => {this.createList(e)}}
+          />
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.contentContainer}>
@@ -97,10 +156,20 @@ class HomeScreen extends React.Component {
         </ScrollView>
         <View style={styles.footerContainer}>
           <TouchableNativeFeedback
-            onPress={(e) => this.newList(e)}
+            onPress={(e) => {this.newList(e)}}
             background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
           >
-            <View>
+            <View style={styles.addNewContainer}>
+              <Ionicons
+                name={
+                  Platform.OS === 'ios'
+                  ? `ios-add${focused ? '' : '-outline'}`
+                  : 'md-add'
+                }
+                size={24}
+                color={Colors.tintColor}
+                style={{ paddingRight: 10 }}
+              />
               <Text style={styles.footerText}>
                 New List
               </Text>
@@ -155,6 +224,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 10,
     paddingBottom: 10,
+  },
+  addNewContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly'
   },
   footerText: {
     fontSize: 20,

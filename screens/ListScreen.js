@@ -1,4 +1,5 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   Platform,
   View,
@@ -76,11 +77,21 @@ class ListScreen extends React.Component {
             onPress={(e) => this.newItem(e)}
             background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
           >
-            <View>
-              <Text style={styles.footerText}>
-                Add Item
-              </Text>
-            </View>
+          <View style={styles.addNewContainer}>
+            <Ionicons
+              name={
+                Platform.OS === 'ios'
+                ? `ios-add${focused ? '' : '-outline'}`
+                : 'md-add'
+              }
+              size={24}
+              color={Colors.tintColor}
+              style={{ paddingRight: 10 }}
+            />
+            <Text style={styles.footerText}>
+              Add Item
+            </Text>
+          </View>
           </TouchableNativeFeedback>
         </View>
       </View>
@@ -156,6 +167,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 10,
     paddingBottom: 10,
+  },
+  addNewContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly'
   },
   footerText: {
     fontSize: 20,
