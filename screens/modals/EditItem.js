@@ -13,20 +13,23 @@ import {
 } from 'react-native';
 import Colors from '../../constants/Colors';
 
-class EditList extends React.Component {
+class EditItem extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
+      id: '',
       name: '',
-      date: ''
+      quantity: ''
     }
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.name !== prevProps.name) {
+    if ((this.props.item.name !== prevProps.item.name) || (this.props.item.quantity !== prevProps.item.quantity)) {
       this.setState({
-        name: this.props.name
+        id: this.props.item._id,
+        name: this.props.item.name,
+        quantity: this.props.item.quantity
       })
     }
   }
@@ -37,18 +40,19 @@ class EditList extends React.Component {
 
   handleClick(e) {
     const options = {
+      id: this.state.id,
       name: this.state.name,
-      date: this.state.date
+      quantity: this.state.quantity
     }
-    this.props.updateList(options)
+    this.props.updateItem(options)
   }
 
   closeModal(e) {
-    this.props.closeListModal(e)
+    this.props.closeItemModal(e)
   }
 
-  deleteList(e) {
-    this.props.confirmDeleteList(e)
+  deleteItem(e) {
+    this.props.confirmDeleteItem(e)
   }
 
   render() {
@@ -58,13 +62,13 @@ class EditList extends React.Component {
             animationType="slide"
             transparent={true}
             behavior='padding'
-            visible={this.props.listModalVisibility}
+            visible={this.props.itemModalVisibility}
             onRequestClose={(e) => {this.closeModal(e)}}
           >
             <View style={styles.container}>
               <View style={styles.contentContainer}>
                 <View style={styles.closeContainer}>
-                  <TouchableOpacity onPress={(e) => {this.deleteList(e)}}>
+                  <TouchableOpacity onPress={(e) => {this.deleteItem(e)}}>
                     <Ionicons
                       name={
                         Platform.OS === 'ios'
@@ -92,12 +96,12 @@ class EditList extends React.Component {
                 <View style={styles.formContainer}>
                   <View style={styles.headerContainer}>
                     <Text style={styles.headerText}>
-                      Edit List
+                      Edit Item
                     </Text>
                   </View>
                   <View style={styles.inputContainer}>
                     <TextInput
-                      placeholder='List Name'
+                      placeholder='Item Name'
                       placeholderTextColor='rgba(96,100,109, 0.6)'
                       value={this.state.name}
                       style={styles.inputText}
@@ -105,8 +109,19 @@ class EditList extends React.Component {
                     >
                     </TextInput>
                   </View>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      placeholder='Item Quantity'
+                      placeholderTextColor='rgba(96,100,109, 0.6)'
+                      value={this.state.quantity ? this.state.quantity.toString() : ''}
+                      style={styles.inputText}
+                      keyboardType='numeric'
+                      onChangeText={(e) => {this.handleChange(e, 'quantity')}}
+                    >
+                    </TextInput>
+                  </View>
                   <Button
-                    title='Update List'
+                    title='Update Item'
                     color={Colors.tintColor}
                     onPress={(e) => {this.handleClick(e)}}
                     />
@@ -119,7 +134,7 @@ class EditList extends React.Component {
   }
 }
 
-export default EditList;
+export default EditItem;
 
 const styles = StyleSheet.create({
   container: {

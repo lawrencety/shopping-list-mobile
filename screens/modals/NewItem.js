@@ -4,7 +4,7 @@ import {
   View,
   KeyboardAvoidingView,
   Modal,
-  TouchableOpacity,
+  TouchableHighlight,
   Platform,
   Text,
   TextInput,
@@ -13,21 +13,13 @@ import {
 } from 'react-native';
 import Colors from '../../constants/Colors';
 
-class EditList extends React.Component {
+class NewItem extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
       name: '',
-      date: ''
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.name !== prevProps.name) {
-      this.setState({
-        name: this.props.name
-      })
+      quantity: ''
     }
   }
 
@@ -38,17 +30,13 @@ class EditList extends React.Component {
   handleClick(e) {
     const options = {
       name: this.state.name,
-      date: this.state.date
+      quantity: this.state.quantity
     }
-    this.props.updateList(options)
+    this.props.createItem(options)
   }
 
   closeModal(e) {
-    this.props.closeListModal(e)
-  }
-
-  deleteList(e) {
-    this.props.confirmDeleteList(e)
+    this.props.closeNewItemModal(e)
   }
 
   render() {
@@ -58,46 +46,34 @@ class EditList extends React.Component {
             animationType="slide"
             transparent={true}
             behavior='padding'
-            visible={this.props.listModalVisibility}
+            visible={this.props.newItemModalVisibility}
             onRequestClose={(e) => {this.closeModal(e)}}
           >
             <View style={styles.container}>
               <View style={styles.contentContainer}>
                 <View style={styles.closeContainer}>
-                  <TouchableOpacity onPress={(e) => {this.deleteList(e)}}>
-                    <Ionicons
-                      name={
-                        Platform.OS === 'ios'
-                        ? `ios-trash${focused ? '' : '-outline'}`
-                        : 'md-trash'
-                      }
-                      size={36}
-                      color='rgba(96,100,109, 1)'
-                      style={{ marginBottom: -3 }}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={(e) => {this.closeModal(e)}}>
+                  <TouchableHighlight onPress={(e) => {this.closeModal(e)}}>
                     <Ionicons
                       name={
                         Platform.OS === 'ios'
                         ? `ios-close${focused ? '' : '-outline'}`
                         : 'md-close'
                       }
-                      size={36}
+                      size={40}
                       color='rgba(96,100,109, 1)'
                       style={{ marginBottom: -3 }}
                     />
-                  </TouchableOpacity>
+                  </TouchableHighlight>
                 </View>
                 <View style={styles.formContainer}>
                   <View style={styles.headerContainer}>
                     <Text style={styles.headerText}>
-                      Edit List
+                      New Item
                     </Text>
                   </View>
                   <View style={styles.inputContainer}>
                     <TextInput
-                      placeholder='List Name'
+                      placeholder='Item Name'
                       placeholderTextColor='rgba(96,100,109, 0.6)'
                       value={this.state.name}
                       style={styles.inputText}
@@ -105,8 +81,19 @@ class EditList extends React.Component {
                     >
                     </TextInput>
                   </View>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      placeholder='Item Quantity'
+                      placeholderTextColor='rgba(96,100,109, 0.6)'
+                      value={this.state.quantity}
+                      style={styles.inputText}
+                      keyboardType='numeric'
+                      onChangeText={(e) => {this.handleChange(e, 'quantity')}}
+                    >
+                    </TextInput>
+                  </View>
                   <Button
-                    title='Update List'
+                    title='Create Item'
                     color={Colors.tintColor}
                     onPress={(e) => {this.handleClick(e)}}
                     />
@@ -119,7 +106,7 @@ class EditList extends React.Component {
   }
 }
 
-export default EditList;
+export default NewItem;
 
 const styles = StyleSheet.create({
   container: {
@@ -136,11 +123,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
   closeContainer: {
-    flexDirection: 'row',
-    marginLeft: 10,
     marginRight: 10,
     marginBottom: -40,
-    justifyContent: 'space-between'
+    alignItems: 'flex-end'
   },
   formContainer: {
     flex: 1,
