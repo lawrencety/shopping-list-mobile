@@ -71,9 +71,9 @@ class EditList extends React.Component {
                         ? `ios-trash${focused ? '' : '-outline'}`
                         : 'md-trash'
                       }
-                      size={36}
+                      size={32}
                       color='rgba(96,100,109, 1)'
-                      style={{ marginBottom: -3 }}
+                      style={{ marginTop: 4 }}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={(e) => {this.closeModal(e)}}>

@@ -149,7 +149,6 @@ class ListScreen extends React.Component {
       return res.json()
     })
     .then((response) => {
-      console.log(response)
       this.setState({
         items: this.state.items.concat(response.data)
       })

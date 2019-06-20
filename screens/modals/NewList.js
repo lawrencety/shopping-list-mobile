@@ -32,10 +32,18 @@ class NewList extends React.Component {
       name: this.state.name,
       date: this.state.date
     }
+    this.setState({
+      name: '',
+      date: ''
+    })
     this.props.createList(options)
   }
 
   closeModal(e) {
+    this.setState({
+      name: '',
+      date: ''
+    })
     this.props.hideModal(e)
   }
 

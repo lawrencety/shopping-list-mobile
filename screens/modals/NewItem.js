@@ -32,10 +32,18 @@ class NewItem extends React.Component {
       name: this.state.name,
       quantity: this.state.quantity
     }
+    this.setState({
+      name: '',
+      quantity: ''
+    })
     this.props.createItem(options)
   }
 
   closeModal(e) {
+    this.setState({
+      name: '',
+      quantity: ''
+    })
     this.props.closeNewItemModal(e)
   }
 
