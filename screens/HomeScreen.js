@@ -53,37 +53,6 @@ class HomeScreen extends React.Component {
     })
   }
 
-  setPurchaseStatus(e, listId, itemId) {
-    const newLists = this.state.lists;
-    newLists.forEach((list) => {
-      if (list._id === listId) {
-        list.items.forEach((item) => {
-          if(item._id === itemId) {
-            item.purchaseStatus = e;
-            const endpoint = '';
-            if (e) {
-              endpoint = 'purchaseStatusTrue';
-            } else {
-              endpoint = 'purchaseStatusFalse';
-            }
-            return (
-              fetch(`${url}lists/${listId}/items/${itemId}/${endpoint}`)
-              .then((res) => {
-                return res.json()
-              })
-              .then((response) => {
-                console.log('Success', response)
-                this.setState({
-                  lists: newLists
-                })
-              })
-            )
-          }
-        })
-      }
-    })
-  }
-
   newList(e) {
     this.setState({
       modalVisibility: true
@@ -150,7 +119,6 @@ class HomeScreen extends React.Component {
                       name: list.name,
                       id: list._id,
                       items: list.items,
-                      setPurchaseStatus: (e) => this.setPurchaseStatus(e),
                       handleDeleteList: (e) => this.handleDeleteList(e)
                     }
                   )}}

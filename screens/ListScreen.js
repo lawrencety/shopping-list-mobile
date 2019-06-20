@@ -143,6 +143,7 @@ class ListScreen extends React.Component {
       return res.json()
     })
     .then((response) => {
+      console.log(response)
       this.setState({
         items: this.state.items.concat(response.data)
       })
@@ -150,9 +151,44 @@ class ListScreen extends React.Component {
     })
   }
 
-  toggleCheckBox(e, listId, itemId) {
-    const {navigation} = this.props;
-    return navigation.state.params.setPurchaseStatus(e, listId, itemId);
+  toggleCheckBox(e, itemId) {
+    this.setPurchaseStatus(e, itemId)
+  }
+
+  setPurchaseStatus(e, itemId) {
+    const newItems = this.state.items;
+    newItems.forEach((item) => {
+      if(item._id === itemId) {
+        item.purchaseStatus = e;
+        let endpoint = '';
+        if (e) {
+          endpoint = 'purchaseStatusTrue';
+        } else {
+          endpoint = 'purchaseStatusFalse';
+        }
+        return (
+          fetch(`${url}lists/${this.state.id}/items/${itemId}/${endpoint}`, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json'
+              }
+            }
+          )
+          .then((res) => {
+            return res.json()
+          })
+          .then((response) => {
+            this.setState({
+              items: newItems
+            })
+          })
+          .catch((err) => {
+            console.log(err)
+          })
+        )
+      }
+    })
   }
 
   render() {
@@ -198,7 +234,7 @@ class ListScreen extends React.Component {
               return (
                 <View style={styles.itemContainer} key={item._id}>
                   <View style={styles.checkBoxContainer}>
-                    <CheckBox value={item.purchaseStatus} onValueChange={(e) => {this.toggleCheckBox(e, id, item._id)}}></CheckBox>
+                    <CheckBox value={item.purchaseStatus} onValueChange={(e) => {this.toggleCheckBox(e, item._id)}}></CheckBox>
                   </View>
                   <View style={styles.itemNameContainer}>
                     <Text style={styles.itemText}>
