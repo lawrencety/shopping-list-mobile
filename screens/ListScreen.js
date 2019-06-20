@@ -15,6 +15,7 @@ import Colors from '../constants/Colors';
 import EditList from './modals/EditList';
 import ConfirmDeleteList from './modals/ConfirmDeleteList';
 import NewItem from './modals/NewItem';
+import EditItem from './modals/EditItem';
 const url = 'http://192.168.1.67:3000/';
 
 class ListScreen extends React.Component {
@@ -28,6 +29,8 @@ class ListScreen extends React.Component {
       listModalVisibility: false,
       deleteConfirmModalVisibility: false,
       newItemModalVisibility: false,
+      itemModalVisibility: false,
+      focusedItem: {}
     }
   }
 
@@ -157,15 +160,15 @@ class ListScreen extends React.Component {
 
   setPurchaseStatus(e, itemId) {
     const newItems = this.state.items;
+    let endpoint = '';
+    if (e) {
+      endpoint = 'purchaseStatusTrue';
+    } else {
+      endpoint = 'purchaseStatusFalse';
+    }
     newItems.forEach((item) => {
       if(item._id === itemId) {
         item.purchaseStatus = e;
-        let endpoint = '';
-        if (e) {
-          endpoint = 'purchaseStatusTrue';
-        } else {
-          endpoint = 'purchaseStatusFalse';
-        }
         return (
           fetch(`${url}lists/${this.state.id}/items/${itemId}/${endpoint}`, {
             method: 'POST',
@@ -191,6 +194,53 @@ class ListScreen extends React.Component {
     })
   }
 
+  openItemModal(e, item) {
+    this.setState({
+      itemModalVisibility: true,
+      focusedItem: item
+    })
+  }
+
+  closeItemModal(e) {
+    this.setState({
+      itemModalVisibility: false,
+      focusedItem: {}
+    })
+  }
+
+  updateItem(e) {
+    const options = {
+      name: e.name,
+      quantity: e.quantity,
+    }
+    fetch(`${url}lists/${this.state.id}/items/${e.id}/update`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(options)
+      }
+    )
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      console.log(response.data)
+      const newItems = this.state.items;
+      newItems.forEach((item) => {
+        if (item._id === response.data._id) {
+          item.name = response.data.name;
+          item.quantity = response.data.quantity;
+        }
+      })
+      this.setState({
+        items: newItems
+      })
+      this.closeItemModal(e)
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -210,6 +260,12 @@ class ListScreen extends React.Component {
           newItemModalVisibility = {this.state.newItemModalVisibility}
           closeNewItemModal = {(e) => {this.closeNewItemModal(e)}}
           createItem = {(e) => {this.createItem(e)}}
+          />
+        <EditItem
+          itemModalVisibility = {this.state.itemModalVisibility}
+          closeItemModal = {(e) => {this.closeItemModal(e)}}
+          item = {this.state.focusedItem}
+          updateItem = {(e) => {this.updateItem(e)}}
           />
         <ScrollView style={styles.contentContainer}>
           <View style={styles.headerContainer}>
@@ -246,6 +302,18 @@ class ListScreen extends React.Component {
                       qty: {item.quantity}
                     </Text>
                   </View>
+                  <TouchableOpacity onPress={(e) => {this.openItemModal(e, item)}}>
+                    <Ionicons
+                      name={
+                        Platform.OS === 'ios'
+                        ? `ios-create${focused ? '' : '-outline'}`
+                        : 'md-create'
+                      }
+                      size={26}
+                      color='rgba(96,100,109, 1)'
+                      style={{ marginBottom: -3, marginRight: 12 }}
+                    />
+                  </TouchableOpacity>
                 </View>
               )
             })
@@ -317,7 +385,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   itemContainer: {
-    alignItems: 'stretch',
+    justifyContent: 'space-between',
     flexDirection: 'row',
     paddingLeft: 20,
     paddingTop: 10,
@@ -330,10 +398,10 @@ const styles = StyleSheet.create({
     width: 50
   },
   itemNameContainer: {
-    width: 250
+    width: 220
   },
   itemQtyContainer: {
-    width: 100
+    width: 80
   },
   itemText: {
     fontSize: 18,
