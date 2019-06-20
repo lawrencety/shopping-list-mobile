@@ -19,7 +19,11 @@ class ConfirmDeleteList extends React.Component {
   }
 
   handleClick(e) {
-    this.props.deleteListConfirmed(e)
+    if (this.props.type === 'list') {
+      this.props.deleteListConfirmed(e)
+    } else if (this.props.type === 'item') {
+      this.props.deleteItemConfirmed(e)
+    }
   }
 
   closeModal(e) {

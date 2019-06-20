@@ -52,7 +52,7 @@ class EditItem extends React.Component {
   }
 
   deleteItem(e) {
-    this.props.confirmDelete(e)
+    this.props.confirmDeleteItem(e)
   }
 
   render() {

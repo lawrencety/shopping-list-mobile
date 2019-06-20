@@ -48,7 +48,7 @@ class EditList extends React.Component {
   }
 
   deleteList(e) {
-    this.props.confirmDelete(e)
+    this.props.confirmDeleteList(e)
   }
 
   render() {

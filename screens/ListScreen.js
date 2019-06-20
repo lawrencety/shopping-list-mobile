@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import Colors from '../constants/Colors';
 import EditList from './modals/EditList';
-import ConfirmDeleteList from './modals/ConfirmDeleteList';
+import ConfirmDelete from './modals/ConfirmDelete';
 import NewItem from './modals/NewItem';
 import EditItem from './modals/EditItem';
 const url = 'http://192.168.1.67:3000/';
@@ -30,7 +30,8 @@ class ListScreen extends React.Component {
       deleteConfirmModalVisibility: false,
       newItemModalVisibility: false,
       itemModalVisibility: false,
-      focusedItem: {}
+      focusedItem: {},
+      deleteType: ''
     }
   }
 
@@ -83,16 +84,18 @@ class ListScreen extends React.Component {
     })
   }
 
-  confirmDelete(e) {
+  confirmDeleteList(e) {
     this.setState({
       listModalVisibility: false,
       deleteConfirmModalVisibility: true,
+      deleteType: 'list'
     })
   }
 
   closeConfirmDeleteModal(e) {
     this.setState({
-      deleteConfirmModalVisibility: false
+      deleteConfirmModalVisibility: false,
+      deleteType: ''
     })
   }
 
@@ -241,6 +244,38 @@ class ListScreen extends React.Component {
     })
   }
 
+  confirmDeleteItem(e) {
+    this.setState({
+      itemModalVisibility: false,
+      deleteConfirmModalVisibility: true,
+      deleteType: 'item'
+    })
+  }
+
+  deleteItemConfirmed(e) {
+    fetch(`${url}lists/${this.state.id}/items/${this.state.focusedItem._id}/destroy`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+        }
+      }
+    )
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      console.log(response.data)
+      const newItems = this.state.items.filter((item) => {
+        return item._id !== response.data
+      })
+      this.setState({
+        items: newItems
+      })
+      this.closeConfirmDeleteModal(e)
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -249,12 +284,14 @@ class ListScreen extends React.Component {
           closeListModal = {(e) => {this.closeListModal(e)}}
           name = {this.state.name}
           updateList = {(e) => {this.updateList(e)}}
-          confirmDelete = {(e) => {this.confirmDelete(e)}}
+          confirmDeleteList = {(e) => {this.confirmDeleteList(e)}}
           />
-        <ConfirmDeleteList
+        <ConfirmDelete
           deleteConfirmModalVisibility = {this.state.deleteConfirmModalVisibility}
           closeConfirmDeleteModal = {(e) => {this.closeConfirmDeleteModal(e)}}
           deleteListConfirmed = {(e) => {this.deleteListConfirmed(e)}}
+          deleteItemConfirmed = {(e) => {this.deleteItemConfirmed(e)}}
+          type = {this.state.deleteType}
           />
         <NewItem
           newItemModalVisibility = {this.state.newItemModalVisibility}
@@ -266,6 +303,7 @@ class ListScreen extends React.Component {
           closeItemModal = {(e) => {this.closeItemModal(e)}}
           item = {this.state.focusedItem}
           updateItem = {(e) => {this.updateItem(e)}}
+          confirmDeleteItem = {(e) => {this.confirmDeleteItem(e)}}
           />
         <ScrollView style={styles.contentContainer}>
           <View style={styles.headerContainer}>
