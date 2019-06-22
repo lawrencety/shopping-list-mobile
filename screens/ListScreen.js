@@ -31,8 +31,10 @@ class ListScreen extends React.Component {
       newItemModalVisibility: false,
       itemModalVisibility: false,
       focusedItem: {},
-      deleteType: ''
+      deleteType: '',
+      socket: {}
     }
+
   }
 
   componentDidMount() {
@@ -40,11 +42,34 @@ class ListScreen extends React.Component {
     const id = navigation.getParam('id', 'List ID');
     const nameParam = navigation.getParam('name', 'List Name');
     const itemsParam = navigation.getParam('items', []);
-    return this.setState({
+    this.setState({
       id : id,
       name: nameParam,
-      items: itemsParam
+      items: itemsParam,
     });
+    this.listenToSocket()
+  }
+
+  listenToSocket() {
+    const {navigation} = this.props;
+    const socket = navigation.getParam('socket', {});
+    this.setState({
+      socket: socket
+    })
+    socket.on('newItem', (newItem) =>{
+      let existingItem = this.state.items.filter((item) => {
+        return (item._id === newItem._id)
+      })
+
+      if (existingItem.length === 0) {
+        console.log('Adding item')
+        this.setState({
+          lists: this.state.lists.concat(newItem)
+        })
+      } else {
+        console.log('Item exists')
+      }
+    })
   }
 
   openListModal(e) {
@@ -81,6 +106,7 @@ class ListScreen extends React.Component {
         name: response.data.name,
       })
       this.closeListModal(e)
+      this.state.socket.emit('updatedList', (response.data))
     })
   }
 
@@ -152,7 +178,8 @@ class ListScreen extends React.Component {
       this.setState({
         items: this.state.items.concat(response.data)
       })
-      this.closeNewItemModal(e)
+      this.closeNewItemModal(e);
+      this.state.socket.emit('addedItem', (response.data));
     })
   }
 
