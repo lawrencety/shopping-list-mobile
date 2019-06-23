@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import Colors from '../constants/Colors';
 import NewList from './modals/NewList';
+import io from 'socket.io-client';
 const url = 'http://192.168.1.67:3000/';
-
 
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -24,6 +24,10 @@ class HomeScreen extends React.Component {
       lists: [],
       modalVisibility: false
     }
+
+    this.socket = io(`${url}`)
+    this.listenToSocket(this.socket)
+
   }
 
   componentDidMount() {
@@ -50,6 +54,82 @@ class HomeScreen extends React.Component {
           ]}
         ]
       })
+    })
+  }
+
+  listenToSocket(socket) {
+    socket.on('connect', () => {
+      console.log('WebSocket connected')
+    })
+
+    socket.on('newList', (newList) => {
+      let existingList = this.state.lists.filter((list) => {
+        return list._id === newList.id
+      })
+
+      if (existingList.length === 0) {
+        this.setState({
+          lists: this.state.lists.concat(newList)
+        })
+      } else {
+        console.log('Already added')
+      }
+    })
+
+    socket.on('list', (updatedList) => {
+      let newLists = this.state.lists;
+      let index = newLists.findIndex((list) => {
+        return list._id === updatedList._id
+      });
+
+      if (index !== -1) {
+        console.log('Updating list');
+        newLists[index] = updatedList;
+        this.setState({
+          lists: newLists
+        })
+      } else {
+        console.log('List does not exist, adding list');
+        this.setState({
+          lists: this.state.lists.concat(updatedList)
+        })
+      }
+    })
+
+    socket.on('deleteList', (listId) => {
+      let newLists = this.state.lists.filter((list) => {
+        return (list._id !== listId)
+      })
+      this.setState({
+        lists: newLists
+      })
+    })
+
+    socket.on('newItem', (item) => {
+      refreshComponent()
+    })
+
+    socket.on('item', (item) => {
+      refreshComponent()
+    })
+
+    socket.on('deleteItem', (item) => {
+      refreshComponent()
+    })
+  }
+
+  refreshComponent() {
+    return fetch(`${url}lists`)
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      this.setState({
+        lists: response.data
+      })
+    })
+    .catch((err) => {
+      console.log(err)
     })
   }
 
@@ -87,6 +167,7 @@ class HomeScreen extends React.Component {
         lists: this.state.lists.concat(response.data)
       })
       this.hideModal(e)
+      this.socket.emit('addedList', response.data)
     })
   }
 
@@ -119,7 +200,8 @@ class HomeScreen extends React.Component {
                       name: list.name,
                       id: list._id,
                       items: list.items,
-                      handleDeleteList: (e) => this.handleDeleteList(e)
+                      handleDeleteList: (e) => this.handleDeleteList(e),
+                      socket: this.socket
                     }
                   )}}
                   background={Platform.OS === 'android' ? TouchableNativeFeedback.SelectableBackground() : ''}
