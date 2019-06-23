@@ -56,7 +56,17 @@ class ListScreen extends React.Component {
     this.setState({
       socket: socket
     })
-    socket.on('newItem', (newItem) =>{
+
+    socket.on('list', (list) => {
+      if (list._id === this.state.id) {
+        this.setState({
+          name: list.name,
+          items: list.items
+        })
+      }
+    })
+
+    socket.on('newItem', (newItem) => {
       let existingItem = this.state.items.filter((item) => {
         return (item._id === newItem._id)
       })
@@ -69,6 +79,45 @@ class ListScreen extends React.Component {
       } else {
         console.log('Item exists')
       }
+    })
+
+    socket.on('item', (updatedItem) => {
+      let newItems = this.state.items;
+      let index = newItems.findIndex((item) => {
+        return item._id === updatedItem._id
+      });
+
+      if (index !== -1) {
+        console.log('Updating item');
+        newItems[index] = updatedItem;
+        this.setState({
+          items: newItems
+        })
+      } else {
+        console.log('Item does not exist, adding item');
+        this.setState({
+          items: this.state.items.concat(updatedItem)
+        })
+      }
+    })
+
+    socket.on('deleteList', (listId) => {
+      if (this.state.id === listId) {
+        const {navigation} = this.props;
+        navigation.state.params.handleDeleteList(this.state.id)
+        console.log('List deleted');
+        navigation.popToTop()
+      }
+    })
+
+    socket.on('deleteItem', (itemId) => {
+      let newItems = this.state.items.filter((item) => {
+        return item._id !== itemId
+      })
+      console.log('Deleting item');
+      this.setState({
+        items: newItems
+      })
     })
   }
 
@@ -142,6 +191,10 @@ class ListScreen extends React.Component {
       navigation.state.params.handleDeleteList(this.state.id)
       navigation.popToTop()
       this.closeConfirmDeleteModal(e)
+      this.state.socket.emit('deletedList', (this.state.id))
+    })
+    .catch((err) => {
+      console.log(err)
     })
   }
 
@@ -214,6 +267,7 @@ class ListScreen extends React.Component {
             this.setState({
               items: newItems
             })
+            this.state.socket.emit('updatedItem', (response.data))
           })
           .catch((err) => {
             console.log(err)
@@ -255,7 +309,6 @@ class ListScreen extends React.Component {
       return res.json()
     })
     .then((response) => {
-      console.log(response.data)
       const newItems = this.state.items;
       newItems.forEach((item) => {
         if (item._id === response.data._id) {
@@ -267,6 +320,7 @@ class ListScreen extends React.Component {
         items: newItems
       })
       this.closeItemModal(e)
+      this.state.socket.emit('updatedItem', (response.data));
     })
   }
 
@@ -291,7 +345,6 @@ class ListScreen extends React.Component {
       return res.json()
     })
     .then((response) => {
-      console.log(response.data)
       const newItems = this.state.items.filter((item) => {
         return item._id !== response.data
       })
@@ -299,6 +352,7 @@ class ListScreen extends React.Component {
         items: newItems
       })
       this.closeConfirmDeleteModal(e)
+      this.state.socket.emit('deletedItem', response.data)
     })
   }
 

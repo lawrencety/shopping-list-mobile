@@ -39,7 +39,6 @@ class HomeScreen extends React.Component {
       this.setState({
         lists: response.data
       })
-
     })
     .catch((err) => {
       console.log(err)
@@ -79,24 +78,58 @@ class HomeScreen extends React.Component {
 
     socket.on('list', (updatedList) => {
       let newLists = this.state.lists;
-      let listExists = false;
-      newLists.forEach((list) => {
-        if (list._id === updatedList._id) {
-          list = updatedList;
-          listExists = true;
-        }
-      })
-      if (listExists) {
+      let index = newLists.findIndex((list) => {
+        return list._id === updatedList._id
+      });
+
+      if (index !== -1) {
         console.log('Updating list');
+        newLists[index] = updatedList;
         this.setState({
           lists: newLists
         })
       } else {
         console.log('List does not exist, adding list');
         this.setState({
-          lists: this.state.lists.concat(newList)
+          lists: this.state.lists.concat(updatedList)
         })
       }
+    })
+
+    socket.on('deleteList', (listId) => {
+      let newLists = this.state.lists.filter((list) => {
+        return (list._id !== listId)
+      })
+      this.setState({
+        lists: newLists
+      })
+    })
+
+    socket.on('newItem', (item) => {
+      refreshComponent()
+    })
+
+    socket.on('item', (item) => {
+      refreshComponent()
+    })
+
+    socket.on('deleteItem', (item) => {
+      refreshComponent()
+    })
+  }
+
+  refreshComponent() {
+    return fetch(`${url}lists`)
+    .then((res) => {
+      return res.json()
+    })
+    .then((response) => {
+      this.setState({
+        lists: response.data
+      })
+    })
+    .catch((err) => {
+      console.log(err)
     })
   }
 
