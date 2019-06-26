@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Simplist",
-    "slug": "shopping-list-mobile",
+    "slug": "simplist-android",
     "privacy": "public",
     "sdkVersion": "33.0.0",
     "platforms": [
@@ -14,9 +14,9 @@
     "icon": "./assets/images/icon.png",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover"
     },
+    "primaryColor": "#8A2BE2",
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -25,6 +25,9 @@
     ],
     "ios": {
       "supportsTablet": true
+    },
+    "android": {
+      "package": "com.lawrencety.simplist"
     }
   }
 }

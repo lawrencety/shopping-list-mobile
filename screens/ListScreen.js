@@ -16,7 +16,7 @@ import EditList from './modals/EditList';
 import ConfirmDelete from './modals/ConfirmDelete';
 import NewItem from './modals/NewItem';
 import EditItem from './modals/EditItem';
-const url = 'http://192.168.1.67:3000/';
+const url = 'https://simplist-api.appspot.com/';
 
 class ListScreen extends React.Component {
   constructor(props) {
@@ -74,7 +74,7 @@ class ListScreen extends React.Component {
       if (existingItem.length === 0) {
         console.log('Adding item')
         this.setState({
-          lists: this.state.lists.concat(newItem)
+          items: this.state.items.concat(newItem)
         })
       } else {
         console.log('Item exists')

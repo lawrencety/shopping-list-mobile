@@ -14,7 +14,7 @@ import {
 import Colors from '../constants/Colors';
 import NewList from './modals/NewList';
 import io from 'socket.io-client';
-const url = 'http://192.168.1.67:3000/';
+const url = 'https://simplist-api.appspot.com/';
 
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -106,15 +106,15 @@ class HomeScreen extends React.Component {
     })
 
     socket.on('newItem', (item) => {
-      refreshComponent()
+      this.refreshComponent()
     })
 
     socket.on('item', (item) => {
-      refreshComponent()
+      this.refreshComponent()
     })
 
     socket.on('deleteItem', (item) => {
-      refreshComponent()
+      this.refreshComponent()
     })
   }
 
@@ -242,7 +242,7 @@ class HomeScreen extends React.Component {
 }
 
 HomeScreen.navigationOptions = {
-  title: 'My Lists',
+  title: 'Lists',
   headerStyle: {
       backgroundColor: Colors.tintColor
   },
